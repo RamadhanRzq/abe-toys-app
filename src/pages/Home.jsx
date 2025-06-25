@@ -86,7 +86,7 @@ function Home() {
             </div>
 
             <button className="flex justify-center items-center w-full max-w-4xl bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl mx-auto mt-6 px-6 py-4">
-                SIMPAN
+                SIMPAN & CETAK STRUK
             </button>
         </div>
     );
