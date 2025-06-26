@@ -74,14 +74,13 @@ function Home() {
                         <input
                             id="jumlah"
                             type="number"
-                            min="0"
                             value={jumlah}
                             onChange={handleJumlah}
                             className="border rounded-md px-3 py-2 w-full text-base"
                         />
                     </div>
 
-                    <p className="font-bold">Total : Rp {total.toLocaleString('id-ID')}</p>
+                    <p className="font-bold">Total : Rp {total.toLocaleString('id-ID')} </p>
                 </div>
             </div>
 
