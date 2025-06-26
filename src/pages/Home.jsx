@@ -39,6 +39,8 @@ function Home() {
         setPilihanMainan(e.target.value);
     };
 
+    //TEST COMMIT
+
     const handleJumlah = (e) => {
         const value = parseInt(e.target.value) || 0;
         setJumlah(value);
