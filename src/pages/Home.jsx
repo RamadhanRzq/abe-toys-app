@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react';
 import logo from '../assets/logo.png';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import FormMainan from '../utils/FormMainan';
 
 function Home() {
+    const navigate = useNavigate();
     const { namaToko, alamat } = useParams();
     const [tanggalSekarang, setTanggalSekarang] = useState('');
+
+    // Form States dipindah ke sini
     const [pilihanMainan, setPilihanMainan] = useState('');
     const [jumlah, setJumlah] = useState(0);
+    const [inputTambahan, setInputTambahan] = useState([]);
     const [total, setTotal] = useState(0);
 
     useEffect(() => {
         const now = new Date();
-        const optionsTanggal = {
+        const tanggal = now.toLocaleDateString('id-ID', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-        };
-        const tanggal = now.toLocaleDateString('id-ID', optionsTanggal);
+        });
         const jam = now.toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
@@ -25,23 +29,34 @@ function Home() {
         setTanggalSekarang(`${tanggal}, ${jam}`);
     }, []);
 
+    // Update total jika salah satu form berubah
     useEffect(() => {
-        let harga = 0;
-        if (pilihanMainan === 'Mainan 2000') {
-            harga = 1500;
-        } else if (pilihanMainan === 'Mainan 3000') {
-            harga = 2500;
-        }
-        setTotal(harga * jumlah);
-    }, [pilihanMainan, jumlah]);
+        const getHarga = (jenis) => {
+            if (jenis === 'Mainan 2000') return 1500;
+            if (jenis === 'Mainan 3000') return 2500;
+            return 0;
+        };
 
-    const handleJenis = (e) => {
-        setPilihanMainan(e.target.value);
-    };
+        const totalUtama = getHarga(pilihanMainan) * jumlah;
+        const totalTambahan = inputTambahan.reduce((sum, item) => {
+            return sum + getHarga(item.jenis) * item.jumlah;
+        }, 0);
+        setTotal(totalUtama + totalTambahan);
+    }, [pilihanMainan, jumlah, inputTambahan]);
 
-    const handleJumlah = (e) => {
-        const value = parseInt(e.target.value) || 0;
-        setJumlah(value);
+    const handleSimpan = () => {
+        const dataDisimpan = {
+            tglInput : tanggalSekarang,
+            namaToko : namaToko,
+            alamat : alamat,
+            jenisMainanUtama: pilihanMainan,
+            jumlahUtama: jumlah,
+            tambahan: inputTambahan,
+            total
+        };
+
+        localStorage.setItem('dataMainan', JSON.stringify(dataDisimpan));
+        navigate(`/${namaToko}/${alamat}/Invoices`);
     };
 
     return (
@@ -50,42 +65,25 @@ function Home() {
                 <img src={logo} alt="Logo" height={300} width={300} className='mt-10' />
             </div>
             <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl mx-auto mt-6 px-6 py-4">
-                <div className="text-black text-xl space-y-6"> 
+                <div className="text-black text-xl space-y-4"> 
                     <p>Tanggal Input : {tanggalSekarang}</p>
                     <p>Nama Toko : {decodeURIComponent(namaToko)}</p>
                     <p>Alamat : {decodeURIComponent(alamat)}</p>
                     
-                    <div>
-                        <label htmlFor="mainan" className="block mb-2 font-bold">Pilih Jenis Mainan:</label>
-                        <select
-                            id="mainan"
-                            value={pilihanMainan}
-                            onChange={handleJenis}
-                            className="border rounded-md px-3 py-2 w-full text-base"
-                        >
-                            <option value="">-- Pilih --</option>
-                            <option value="Mainan 2000">Mainan 2000</option>
-                            <option value="Mainan 3000">Mainan 3000</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="jumlah" className="block mb-2 font-bold">Jumlah:</label>
-                        <input
-                            id="jumlah"
-                            type="number"
-                            value={jumlah}
-                            onChange={handleJumlah}
-                            className="border rounded-md px-3 py-2 w-full text-base"
-                        />
-                    </div>
-
-                    <p className="font-bold">Total : Rp {total.toLocaleString('id-ID')} </p>
+                    <FormMainan
+                        pilihanMainan={pilihanMainan}
+                        setPilihanMainan={setPilihanMainan}
+                        jumlah={jumlah}
+                        setJumlah={setJumlah}
+                        inputTambahan={inputTambahan}
+                        setInputTambahan={setInputTambahan}
+                        total={total}
+                    />
                 </div>
             </div>
 
-            <button className="flex justify-center items-center w-full max-w-4xl bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl mx-auto mt-6 px-6 py-4">
-                SIMPAN & CETAK STRUK
+            <button onClick={handleSimpan} className="flex justify-center items-center w-full max-w-4xl bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl mx-auto mt-6 px-6 py-4">
+                SIMPAN
             </button>
         </div>
     );
